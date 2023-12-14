@@ -2,52 +2,75 @@
 <html>
 <head>
 	<script src="https://unpkg.com/konva@7.0.3/konva.min.js"></script>
-
-
 </head>
 <body>
-	<h3>Konva circles</h3>
+	<h3>Konva Solar System</h3>
 	<div id="container-konva"></div>
 	<script>
+		var stage = new Konva.Stage({
+			height: 800,
+			width: 800,
+			container: "container-konva",
+		});
 
-var stage = new Konva.Stage({
-		height: 800,
-		width: 800,
-		container: "container-konva",
-	});
+		var layer = new Konva.Layer();
 
-	var layer = new Konva.Layer();
+		// Sun
+		var sun = new Konva.Circle({
+			x: 400,
+			y: 400,
+			fill: "yellow",
+			radius: 50,
+		});
 
+		// Earth
+		var earth = new Konva.Circle({
+			x: 500,
+			y: 400,
+			fill: "blue",
+			radius: 20,
+		});
 
-	var circle1 = new Konva.Circle({
-		x:200,
-		y:200,
-		fill: "blue",
-		radius:50,
-	});
+		var orbitRadius = 100;
+		var earthOrbitPath = new Konva.Circle({
+			x: sun.x(),
+			y: sun.y(),
+			radius: orbitRadius,
+			stroke: 'black',
+			strokeWidth: 1,
+			dash: [5, 5],
+		});
 
+		var line = new Konva.Line({
+			points: [sun.x(), sun.y(), earth.x(), earth.y()],
+			stroke: 'black',
+			strokeWidth: 2,
+		});
 
-	var circle2 = new Konva.Circle({
-		x:500,
-		y:200,
-		fill: "red",
-		radius:50,
-	});
+		layer.add(sun);
+		layer.add(earthOrbitPath);
+		layer.add(earth);
+		layer.add(line);
 
-	var line = new Konva.Line({
-		points: [circle1.x()+circle1.radius(),circle1.y(),circle2.x()-circle2.radius(),circle2.y()],
-		stroke: 'black',
-        strokeWidth: 5,
+		stage.add(layer);
 
+		var angularSpeed = 0.02;
+		var angle = 0;
 
-	});
+		// Function to update Earth's position
+		function update() {
+			angle += angularSpeed;
+			var x = sun.x() + orbitRadius * Math.cos(angle);
+			var y = sun.y() + orbitRadius * Math.sin(angle);
 
+			earth.position({ x: x, y: y });
+			line.points([sun.x(), sun.y(), earth.x(), earth.y()]);
 
-	layer.add(circle1);
-	layer.add(circle2);
-	layer.add(line);
+			layer.batchDraw();
+			requestAnimationFrame(update);
+		}
 
-	stage.add(layer);
+		update(); // Start the animation loop
 	</script>
 </body>
 </html>
