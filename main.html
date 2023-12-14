@@ -1,76 +1,105 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-	<script src="https://unpkg.com/konva@7.0.3/konva.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar System</title>
+    <script src="https://unpkg.com/konva@7.0.3/konva.min.js"></script>
 </head>
 <body>
-	<h3>Konva Solar System</h3>
-	<div id="container-konva"></div>
-	<script>
-		var stage = new Konva.Stage({
-			height: 800,
-			width: 800,
-			container: "container-konva",
-		});
+    <h3>Konva Solar System</h3>
+    <div id="container-konva"></div>
+    <script>
+        var stage = new Konva.Stage({
+            height: 800,
+            width: 800,
+            container: "container-konva",
+        });
 
-		var layer = new Konva.Layer();
+        var layer = new Konva.Layer();
 
-		// Sun
-		var sun = new Konva.Circle({
-			x: 400,
-			y: 400,
-			fill: "yellow",
-			radius: 50,
-		});
+        // Function to create a planet
+        function createPlanet(x, y, radius, fill, orbitRadius, angularSpeed) {
+            var planet = new Konva.Circle({
+                x: x,
+                y: y,
+                fill: fill,
+                radius: radius,
+            });
 
-		// Earth
-		var earth = new Konva.Circle({
-			x: 500,
-			y: 400,
-			fill: "blue",
-			radius: 20,
-		});
+            var orbitPath = new Konva.Circle({
+                x: sun.x(),
+                y: sun.y(),
+                radius: orbitRadius,
+                stroke: 'black',
+                strokeWidth: 1,
+                dash: [5, 5],
+            });
 
-		var orbitRadius = 100;
-		var earthOrbitPath = new Konva.Circle({
-			x: sun.x(),
-			y: sun.y(),
-			radius: orbitRadius,
-			stroke: 'black',
-			strokeWidth: 1,
-			dash: [5, 5],
-		});
+            var planetLine = new Konva.Line({
+                points: [sun.x(), sun.y(), planet.x(), planet.y()],
+                stroke: 'black',
+                strokeWidth: 2,
+            });
 
-		var line = new Konva.Line({
-			points: [sun.x(), sun.y(), earth.x(), earth.y()],
-			stroke: 'black',
-			strokeWidth: 2,
-		});
+            layer.add(orbitPath);
+            layer.add(planet);
+            layer.add(planetLine);
 
-		layer.add(sun);
-		layer.add(earthOrbitPath);
-		layer.add(earth);
-		layer.add(line);
+            return {
+                planet: planet,
+                orbitPath: orbitPath,
+                planetLine: planetLine,
+                angularSpeed: angularSpeed,
+                angle: 0,
+            };
+        }
 
-		stage.add(layer);
+        // Sun
+        var sun = new Konva.Circle({
+            x: 400,
+            y: 400,
+            fill: "yellow",
+            radius: 30,
+        });
 
-		var angularSpeed = 0.02;
-		var angle = 0;
+        layer.add(sun);
 
-		// Function to update Earth's position
-		function update() {
-			angle += angularSpeed;
-			var x = sun.x() + orbitRadius * Math.cos(angle);
-			var y = sun.y() + orbitRadius * Math.sin(angle);
+        // Create planets
+        var mercury = createPlanet(400, 400, 5, 'gray', 50, 0.1);
+        var venus = createPlanet(400, 400, 8, 'orange', 80, 0.07);
+        var earth = createPlanet(400, 400, 10, 'blue', 110, 0.05);
+        var mars = createPlanet(400, 400, 9, 'red', 150, 0.035);
+        var jupiter = createPlanet(400, 400, 20, 'brown', 200, 0.015);
+        var saturn = createPlanet(400, 400, 18, 'gold', 280, 0.01);
 
-			earth.position({ x: x, y: y });
-			line.points([sun.x(), sun.y(), earth.x(), earth.y()]);
+        stage.add(layer);
 
-			layer.batchDraw();
-			requestAnimationFrame(update);
-		}
+        // Function to update planets' positions
+        function update() {
+            updatePlanetPosition(mercury);
+            updatePlanetPosition(venus);
+            updatePlanetPosition(earth);
+            updatePlanetPosition(mars);
+            updatePlanetPosition(jupiter);
+            updatePlanetPosition(saturn);
 
-		update(); // Start the animation loop
-	</script>
+            layer.batchDraw();
+            requestAnimationFrame(update);
+        }
+
+        // Function to update a planet's position
+        function updatePlanetPosition(planetInfo) {
+            planetInfo.angle += planetInfo.angularSpeed;
+
+            var x = sun.x() + planetInfo.orbitPath.radius() * Math.cos(planetInfo.angle);
+            var y = sun.y() + planetInfo.orbitPath.radius() * Math.sin(planetInfo.angle);
+
+            planetInfo.planet.position({ x: x, y: y });
+            planetInfo.planetLine.points([sun.x(), sun.y(), planetInfo.planet.x(), planetInfo.planet.y()]);
+        }
+
+        update(); // Start the animation loop
+    </script>
 </body>
 </html>
